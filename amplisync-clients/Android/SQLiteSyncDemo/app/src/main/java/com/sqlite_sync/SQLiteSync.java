@@ -28,6 +28,7 @@ import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
 /**
  * SQLiteSync class
+ *
  * @author sqlite-sync.com
  */
 public class SQLiteSync {
@@ -37,7 +38,7 @@ public class SQLiteSync {
     /**
      * Interface used as callback from asynchronous methods.
      */
-    public interface SQLiteSyncCallback{
+    public interface SQLiteSyncCallback {
         /**
          * Interface method executed when action finished successfull
          */
@@ -45,6 +46,7 @@ public class SQLiteSync {
 
         /**
          * Interface method executed when action finished with error
+         *
          * @param error exception encountered during action
          */
         void onError(Exception error);
@@ -52,10 +54,11 @@ public class SQLiteSync {
 
     /**
      * Create instance of SQLiteSync class
+     *
      * @param dbFileName path to local sqlite database file
-     * @param serverURL synchronization webservice url
+     * @param serverURL  synchronization webservice url
      */
-    public SQLiteSync(String dbFileName, String serverURL){
+    public SQLiteSync(String dbFileName, String serverURL) {
         _serverURL = serverURL;
         _dbFileName = dbFileName;
     }
@@ -64,27 +67,26 @@ public class SQLiteSync {
 
     /**
      * Asynchronously recreate database schema from remote server for specific subscriber
+     *
      * @param subscriberId id of subscriber
-     * @param callback callback to be invoke after function complete
+     * @param callback     callback to be invoke after function complete
      */
-    public void initializeSubscriber(@NonNull final String subscriberId, @NonNull final SQLiteSyncCallback callback){
-        new AsyncTask<Void, Void, Exception>(){
+    public void initializeSubscriber(@NonNull final String subscriberId, @NonNull final SQLiteSyncCallback callback) {
+        new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... voids) {
                 try {
                     initializeSubscriber(subscriberId);
                     return null;
-                }
-                catch (Exception exception) {
+                } catch (Exception exception) {
                     return exception;
                 }
             }
 
             protected void onPostExecute(Exception exception) {
-                if(exception == null){
+                if (exception == null) {
                     callback.onSuccess();
-                }
-                else{
+                } else {
                     callback.onError(exception);
                 }
             }
@@ -93,27 +95,26 @@ public class SQLiteSync {
 
     /**
      * Asynchronously send and receive any changes made for tables included in synchronization
+     *
      * @param subscriberId id of subscriber
-     * @param callback callback to be invoke after function complete
+     * @param callback     callback to be invoke after function complete
      */
-    public void synchronizeSubscriber(@NonNull final String subscriberId, @NonNull final SQLiteSyncCallback callback){
-        new AsyncTask<Void, Void, Exception>(){
+    public void synchronizeSubscriber(@NonNull final String subscriberId, @NonNull final SQLiteSyncCallback callback) {
+        new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... voids) {
-                try{
+                try {
                     synchronizeSubscriber(subscriberId);
                     return null;
-                }
-                catch (Exception exception){
+                } catch (Exception exception) {
                     return exception;
                 }
             }
 
             protected void onPostExecute(Exception exception) {
-                if(exception == null){
+                if (exception == null) {
                     callback.onSuccess();
-                }
-                else{
+                } else {
                     callback.onError(exception);
                 }
             }
@@ -122,27 +123,26 @@ public class SQLiteSync {
 
     /**
      * Asynchronously add table to synchronization
+     *
      * @param tableName table name
-     * @param callback callback to be invoke after function complete
+     * @param callback  callback to be invoke after function complete
      */
-    public void addSynchrnizedTable(@NonNull final String tableName, @NonNull final SQLiteSyncCallback callback){
-        new AsyncTask<Void, Void, Exception>(){
+    public void addSynchrnizedTable(@NonNull final String tableName, @NonNull final SQLiteSyncCallback callback) {
+        new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... voids) {
                 try {
                     addSynchrnizedTable(tableName);
                     return null;
-                }
-                catch (Exception exception){
+                } catch (Exception exception) {
                     return exception;
                 }
             }
 
             protected void onPostExecute(Exception exception) {
-                if(exception == null){
+                if (exception == null) {
                     callback.onSuccess();
-                }
-                else{
+                } else {
                     callback.onError(exception);
                 }
             }
@@ -151,27 +151,26 @@ public class SQLiteSync {
 
     /**
      * Asynchronously remove table from synchronization
+     *
      * @param tableName table name
-     * @param callback callback to be invoke after function complete
+     * @param callback  callback to be invoke after function complete
      */
-    public void removeSynchrnizedTable(@NonNull final String tableName, @NonNull final SQLiteSyncCallback callback){
-        new AsyncTask<Void, Void, Exception>(){
+    public void removeSynchrnizedTable(@NonNull final String tableName, @NonNull final SQLiteSyncCallback callback) {
+        new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... voids) {
                 try {
                     removeSynchrnizedTable(tableName);
                     return null;
-                }
-                catch (Exception exception){
+                } catch (Exception exception) {
                     return exception;
                 }
             }
 
             protected void onPostExecute(Exception exception) {
-                if(exception == null){
+                if (exception == null) {
                     callback.onSuccess();
-                }
-                else{
+                } else {
                     callback.onError(exception);
                 }
             }
@@ -183,14 +182,14 @@ public class SQLiteSync {
 
     /**
      * Recreate database schema from remote server for specific subscriber
+     *
      * @param subscriberId id of subscriber
-     * @throws Exception
      */
     public void initializeSubscriber(String subscriberId) throws Exception {
         HttpURLConnection connection = null;
         InputStream resultStream = null;
-        String resultString = null;
-        Map<String, String> schema = null;
+        String resultString;
+        Map<String, String> schema;
 
         String requestUrl = String.format("%s/InitializeSubscriber/%s", _serverURL, subscriberId);
 
@@ -199,23 +198,22 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status){
-                case HttpURLConnection.HTTP_OK:
-                    resultStream = connection.getInputStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    schema = new Gson().fromJson(resultString, new TypeToken<Map<String, String>>(){}.getType());
-                    break;
-                default:
-                    resultStream = connection.getErrorStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    throw new Exception(resultString);
+            if (status == HttpURLConnection.HTTP_OK) {
+                resultStream = connection.getInputStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                schema = new Gson().fromJson(resultString, new TypeToken<Map<String, String>>() {
+                }.getType());
+            } else {
+                resultStream = connection.getErrorStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                throw new Exception(resultString);
             }
-        }
-        finally {
+        } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             if (connection != null) {
@@ -223,24 +221,20 @@ public class SQLiteSync {
             }
         }
 
-        List<String> keys = new ArrayList<String>();
         Set<String> keySet = schema.keySet();
-        for(String key : keySet){
-            keys.add(key);
-        }
+        List<String> keys = new ArrayList<>(keySet);
         Collections.sort(keys);
 
         SQLiteDatabase db = openOrCreateDatabase(_dbFileName, null);
-        try{
+        try {
             db.beginTransaction();
             for (String key : keys) {
-                if(!key.startsWith("00000")){
+                if (!key.startsWith("00000")) {
                     db.execSQL(schema.get(key));
                 }
             }
             db.setTransactionSuccessful();
-        }
-        finally {
+        } finally {
             db.endTransaction();
             db.close();
         }
@@ -248,48 +242,49 @@ public class SQLiteSync {
 
     /**
      * Send and receive any changes made for tables included in synchronization
+     *
      * @param subscriberId id of subscriber
-     * @throws Exception
+     * @throws Exception Exception
      */
     public void synchronizeSubscriber(String subscriberId) throws Exception {
         sendLocalChanges(subscriberId);
         clearChangesMarker();
 
-        List<String> tables = null;
+        List<String> tables;
         SQLiteDatabase db = null;
         Cursor cursor = null;
 
-        try{
+        try {
             tables = new ArrayList<String>();
             db = openOrCreateDatabase(_dbFileName, null);
             cursor = db.rawQuery("select tbl_Name from sqlite_master where type='table' and tbl_Name != 'android_metadata'", null);
-            while (cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 tables.add(cursor.getString(0));
             }
-        }
-        finally {
-            if(cursor != null && !cursor.isClosed()){
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if(db != null && db.isOpen()){
+            if (db != null && db.isOpen()) {
                 db.close();
             }
         }
 
-        for(String tableName : tables){
+        for (String tableName : tables) {
             getRemoteChangesForTable(subscriberId, tableName);
         }
     }
 
     /**
      * Add table to synchronization
+     *
      * @param tableName table name
-     * @throws Exception
+     * @throws Exception Exception
      */
     public void addSynchrnizedTable(String tableName) throws Exception {
         HttpURLConnection connection = null;
         InputStream resultStream = null;
-        String resultString = null;
+        String resultString;
 
         String requestUrl = String.format("%s/AddTable/%s", _serverURL, tableName);
 
@@ -298,7 +293,7 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status){
+            switch (status) {
                 case HttpURLConnection.HTTP_OK:
                     resultStream = connection.getInputStream();
                     resultString = IOUtils.toString(resultStream, "UTF-8");
@@ -308,12 +303,12 @@ public class SQLiteSync {
                     resultString = IOUtils.toString(resultStream, "UTF-8");
                     throw new Exception(resultString);
             }
-        }
-        finally {
+        } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             if (connection != null) {
@@ -324,8 +319,9 @@ public class SQLiteSync {
 
     /**
      * Remove table from synchronization
+     *
      * @param tableName table name
-     * @throws Exception
+     * @throws Exception Exception
      */
     public void removeSynchrnizedTable(String tableName) throws Exception {
         HttpURLConnection connection = null;
@@ -339,22 +335,20 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status){
-                case HttpURLConnection.HTTP_OK:
-                    resultStream = connection.getInputStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    break;
-                default:
-                    resultStream = connection.getErrorStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    throw new Exception(resultString);
+            if (status == HttpURLConnection.HTTP_OK) {
+                resultStream = connection.getInputStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+            } else {
+                resultStream = connection.getErrorStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                throw new Exception(resultString);
             }
-        }
-        finally {
+        } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             if (connection != null) {
@@ -368,8 +362,9 @@ public class SQLiteSync {
 
     /**
      * Send local changes to webservice
+     *
      * @param subscriberId id of subscriber
-     * @throws Exception
+     * @throws Exception Exception
      */
     private void sendLocalChanges(String subscriberId) throws Exception {
         String query;
@@ -381,8 +376,9 @@ public class SQLiteSync {
         try {
             db = openOrCreateDatabase(_dbFileName, null);
 
-            List<String> tables = new ArrayList<String>();
-            query = "select tbl_Name from sqlite_master where type='table' and sql like '%RowId%'  and tbl_Name != 'android_metadata';";
+            List<String> tables = new ArrayList<>();
+            query = "select tbl_Name from sqlite_master where type='table' and sql like '%RowId%' "
+                    + "and tbl_Name != 'android_metadata';";
             cursor = db.rawQuery(query, null);
             while (cursor.moveToNext()) {
                 tables.add(cursor.getString(0));
@@ -421,8 +417,8 @@ public class SQLiteSync {
                         for (int i = 0; i < cursor.getColumnCount(); i++) {
                             if (!cursor.getColumnName(i).equalsIgnoreCase("MergeUpdate")) {
                                 builder.append(String.format("<%1$s><![CDATA[%2$s]]></%1$s>",
-                                                cursor.getColumnName(i),
-                                                cursor.getString(i)));
+                                        cursor.getColumnName(i),
+                                        cursor.getString(i)));
                             }
                         }
                         builder.append("</r>");
@@ -447,12 +443,11 @@ public class SQLiteSync {
             builder.append("</delete>");
 
             builder.append("</SyncData>");
-        }
-        finally {
-            if(cursor != null && !cursor.isClosed()){
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if(db != null && db.isOpen()){
+            if (db != null && db.isOpen()) {
                 db.close();
             }
         }
@@ -483,7 +478,7 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status){
+            switch (status) {
                 case HttpURLConnection.HTTP_OK:
                     resultStream = connection.getInputStream();
                     resultString = IOUtils.toString(resultStream, "UTF-8");
@@ -495,108 +490,7 @@ public class SQLiteSync {
                     resultString = IOUtils.toString(resultStream, "UTF-8");
                     throw new Exception(resultString);
             }
-        }
-        finally {
-            if (resultStream != null) {
-                try {
-                    resultStream.close();
-                } catch (IOException e) { }
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    }
-
-    /**
-     * Clear updated & deleted records marker
-     */
-    private void clearChangesMarker(){
-        String query;
-        SQLiteDatabase db = null;
-        Cursor cursor = null;
-
-        try{
-            db = openOrCreateDatabase(_dbFileName, null);
-
-            List<String> tables = new ArrayList<String>();
-            query = "select tbl_Name from sqlite_master where type='table' and sql like '%RowId%';";
-            cursor = db.rawQuery(query, null);
-            while (cursor.moveToNext()){
-                tables.add(cursor.getString(0));
-            }
-            cursor.close();
-
-            db.beginTransaction();
-            for(String tableName : tables){
-                if(tableName.equalsIgnoreCase("MergeIdentity")) {
-                    db.execSQL(String.format("update MergeIdentity set MergeUpdate=0 where MergeUpdate > 0;"));
-                }
-
-                if(!tableName.equalsIgnoreCase("MergeDelete") && !tableName.equalsIgnoreCase("MergeIdentity")) {
-                    String updTriggerSQL = null;
-
-                    query = String.format("select sql from sqlite_master where type='trigger' and name like 'trMergeUpdate_%1$s'", tableName);
-                    cursor = db.rawQuery(query, null);
-                    if(cursor.moveToFirst()){
-                        updTriggerSQL = cursor.getString(0);
-                    }
-                    cursor.close();
-
-                    if(updTriggerSQL != null){
-                        db.execSQL(String.format("drop trigger trMergeUpdate_%1$s;", tableName));
-                        db.execSQL(String.format("update %1$s set MergeUpdate=0 where MergeUpdate > 0;", tableName));
-                        db.execSQL(updTriggerSQL);
-                    }
-                }
-            }
-
-            db.execSQL("delete from MergeDelete");
-            db.setTransactionSuccessful();
-        }
-        finally {
-            if(cursor != null && !cursor.isClosed()){
-                cursor.close();
-            }
-            if(db != null && db.isOpen()){
-                if(db.inTransaction()){
-                    db.endTransaction();
-                }
-                db.close();
-            }
-        }
-    }
-
-    /**
-     * Get changes for table from remote server for specific subscriber
-     * @param subscriberId id of subscriber
-     * @param tableName table name
-     * @throws Exception
-     */
-    private void getRemoteChangesForTable(String subscriberId, String tableName) throws Exception {
-        HttpURLConnection connection = null;
-        InputStream resultStream = null;
-        String resultString = null;
-
-        String requestUrl = String.format("%s/Sync/%s/%s", _serverURL, subscriberId, tableName);
-
-        try {
-            connection = (HttpURLConnection) new URL(requestUrl).openConnection();
-
-            int status = connection.getResponseCode();
-
-            switch (status){
-                case HttpURLConnection.HTTP_OK:
-                    resultStream = connection.getInputStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    break;
-                default:
-                    resultStream = connection.getErrorStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    throw new Exception(resultString);
-            }
-        }
-        finally {
+        } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
@@ -607,31 +501,130 @@ public class SQLiteSync {
                 connection.disconnect();
             }
         }
+    }
+
+    /**
+     * Clear updated & deleted records marker
+     */
+    private void clearChangesMarker() {
+        String query;
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+
+        try {
+            db = openOrCreateDatabase(_dbFileName, null);
+
+            List<String> tables = new ArrayList<String>();
+            query = "select tbl_Name from sqlite_master where type='table' and sql like '%RowId%';";
+            cursor = db.rawQuery(query, null);
+            while (cursor.moveToNext()) {
+                tables.add(cursor.getString(0));
+            }
+            cursor.close();
+
+            db.beginTransaction();
+            for (String tableName : tables) {
+                if (tableName.equalsIgnoreCase("MergeIdentity")) {
+                    db.execSQL("update MergeIdentity set MergeUpdate=0 where MergeUpdate > 0;");
+                }
+
+                if (!tableName.equalsIgnoreCase("MergeDelete") && !tableName.equalsIgnoreCase("MergeIdentity")) {
+                    String updTriggerSQL = null;
+
+                    query = String.format("select sql from sqlite_master where type='trigger' and name like 'trMergeUpdate_%1$s'", tableName);
+                    cursor = db.rawQuery(query, null);
+                    if (cursor.moveToFirst()) {
+                        updTriggerSQL = cursor.getString(0);
+                    }
+                    cursor.close();
+
+                    if (updTriggerSQL != null) {
+                        db.execSQL(String.format("drop trigger trMergeUpdate_%1$s;", tableName));
+                        db.execSQL(String.format("update %1$s set MergeUpdate=0 where MergeUpdate > 0;", tableName));
+                        db.execSQL(updTriggerSQL);
+                    }
+                }
+            }
+
+            db.execSQL("delete from MergeDelete");
+            db.setTransactionSuccessful();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            if (db != null && db.isOpen()) {
+                if (db.inTransaction()) {
+                    db.endTransaction();
+                }
+                db.close();
+            }
+        }
+    }
+
+    /**
+     * Get changes for table from remote server for specific subscriber
+     *
+     * @param subscriberId id of subscriber
+     * @param tableName    table name
+     * @throws Exception Exception
+     */
+    private void getRemoteChangesForTable(String subscriberId, String tableName) throws Exception {
+        HttpURLConnection connection = null;
+        InputStream resultStream = null;
+        String resultString;
+
+        String requestUrl = String.format("%s/Sync/%s/%s", _serverURL, subscriberId, tableName);
+
+        try {
+            connection = (HttpURLConnection) new URL(requestUrl).openConnection();
+
+            int status = connection.getResponseCode();
+
+            if (status == HttpURLConnection.HTTP_OK) {
+                resultStream = connection.getInputStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+            } else {
+                resultStream = connection.getErrorStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                throw new Exception(resultString);
+            }
+        } finally {
+            if (resultStream != null) {
+                try {
+                    resultStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
 
         SQLiteSyncData[] syncDatas = new Gson().fromJson(resultString, SQLiteSyncData[].class);
 
-        for(SQLiteSyncData syncData : syncDatas){
-            if(syncData.SyncId > 0) {
+        for (SQLiteSyncData syncData : syncDatas) {
+            if (syncData.SyncId > 0) {
                 SQLiteDatabase db = null;
 
-                try{
+                try {
                     db = openOrCreateDatabase(_dbFileName, null);
                     db.beginTransaction();
 
-                    if(syncData.TriggerInsertDrop.length() > 0){
+                    if (syncData.TriggerInsertDrop.length() > 0) {
                         db.execSQL(syncData.TriggerInsertDrop);
                     }
-                    if(syncData.TriggerUpdateDrop.length() > 0){
+                    if (syncData.TriggerUpdateDrop.length() > 0) {
                         db.execSQL(syncData.TriggerUpdateDrop);
                     }
-                    if(syncData.TriggerDeleteDrop.length() > 0){
+                    if (syncData.TriggerDeleteDrop.length() > 0) {
                         db.execSQL(syncData.TriggerDeleteDrop);
                     }
 
                     SQLiteSyncDataRecord[] records = syncData.getSQLiteSyncDataRecords();
 
-                    for(SQLiteSyncDataRecord record : records){
-                        switch (record.Action){
+                    for (SQLiteSyncDataRecord record : records) {
+                        switch (record.Action) {
                             case 1:
                                 db.execSQL(syncData.QueryInsert, record.Columns);
                                 break;
@@ -644,21 +637,20 @@ public class SQLiteSync {
                         }
                     }
 
-                    if(syncData.TriggerInsert.length() > 0){
+                    if (syncData.TriggerInsert.length() > 0) {
                         db.execSQL(syncData.TriggerInsert);
                     }
-                    if(syncData.TriggerUpdate.length() > 0){
+                    if (syncData.TriggerUpdate.length() > 0) {
                         db.execSQL(syncData.TriggerUpdate);
                     }
-                    if(syncData.TriggerDelete.length() > 0){
+                    if (syncData.TriggerDelete.length() > 0) {
                         db.execSQL(syncData.TriggerDelete);
                     }
 
                     db.setTransactionSuccessful();
-                }
-                finally {
-                    if(db != null && db.isOpen()){
-                        if(db.inTransaction()){
+                } finally {
+                    if (db != null && db.isOpen()) {
+                        if (db.inTransaction()) {
                             db.endTransaction();
                         }
                         db.close();
@@ -672,8 +664,9 @@ public class SQLiteSync {
 
     /**
      * Send info to remote server about successful single table synchronization
+     *
      * @param syncId id of synchronization
-     * @throws Exception
+     * @throws Exception Exception
      */
     private void commitSynchronization(@NonNull int syncId) throws Exception {
         HttpURLConnection connection = null;
@@ -687,7 +680,7 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status){
+            switch (status) {
                 case HttpURLConnection.HTTP_OK:
                     resultStream = connection.getInputStream();
                     resultString = IOUtils.toString(resultStream, "UTF-8");
@@ -697,8 +690,7 @@ public class SQLiteSync {
                     resultString = IOUtils.toString(resultStream, "UTF-8");
                     throw new Exception(resultString);
             }
-        }
-        finally {
+        } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
@@ -714,7 +706,7 @@ public class SQLiteSync {
     /**
      * Class representing data structure of table changes received from remote server
      */
-    private class SQLiteSyncData{
+    private class SQLiteSyncData {
         private String Records;
         public String TableName;
 
@@ -740,10 +732,9 @@ public class SQLiteSync {
 
             JSONArray recordsJsonArray = new JSONArray();
 
-            if(recordsObject instanceof JSONArray){
+            if (recordsObject instanceof JSONArray) {
                 recordsJsonArray = (JSONArray) recordsObject;
-            }
-            else if(recordsObject instanceof JSONObject) {
+            } else if (recordsObject instanceof JSONObject) {
                 recordsJsonArray.put(recordsObject);
             }
 
@@ -753,15 +744,14 @@ public class SQLiteSync {
                 Object columnsObject = recordObject.get("c");
 
                 JSONArray columnsJsonArray = new JSONArray();
-                if(columnsObject instanceof JSONArray) {
+                if (columnsObject instanceof JSONArray) {
                     columnsJsonArray = (JSONArray) columnsObject;
-                }
-                else {
+                } else {
                     columnsJsonArray.put(columnsObject);
                 }
 
                 String[] columnsArray = new String[columnsJsonArray.length()];
-                for(int j = 0; j < columnsJsonArray.length(); j++) {
+                for (int j = 0; j < columnsJsonArray.length(); j++) {
                     columnsArray[j] = columnsJsonArray.getString(j);
                 }
 
@@ -775,11 +765,11 @@ public class SQLiteSync {
     /**
      * Class representing data structure of record changes received from remote server
      */
-    private class SQLiteSyncDataRecord{
+    private class SQLiteSyncDataRecord {
         public int Action;
         public String[] Columns;
 
-        public SQLiteSyncDataRecord(int action,String[] columns){
+        public SQLiteSyncDataRecord(int action, String[] columns) {
             Action = action;
             Columns = columns;
         }

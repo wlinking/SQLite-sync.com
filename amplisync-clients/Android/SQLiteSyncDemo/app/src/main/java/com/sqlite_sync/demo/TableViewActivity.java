@@ -99,11 +99,11 @@ public class TableViewActivity extends AppCompatActivity implements View.OnClick
     private void loadGridView() {
         SQLiteDatabase db = null;
         Cursor cursor = null;
-        String[] columns = new String[0];
+        String[] columns;
         List<String[]> rows = new ArrayList<>();
 
         try{
-            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", 1, null);
+            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", MODE_PRIVATE, null);
             cursor = db.rawQuery(String.format("Select * FROM %s;", _tableName), null);
 
             columns = cursor.getColumnNames();
@@ -133,7 +133,7 @@ public class TableViewActivity extends AppCompatActivity implements View.OnClick
         SQLiteDatabase db = null;
 
         try{
-            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", 1, null);
+            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", MODE_PRIVATE, null);
             db.delete(_tableName, "RowId = ?", new String[]{ rowId });
         }
         finally {

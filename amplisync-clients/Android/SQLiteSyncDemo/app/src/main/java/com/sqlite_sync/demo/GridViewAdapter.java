@@ -14,7 +14,7 @@ public class GridViewAdapter extends BaseAdapter implements View.OnClickListener
     private String[] _columns;
     private String[][] _rows;
 
-    public  GridViewAdapter(Context context, String[] columns, String[][] rows, OnRowActionListener onRowActionListener){
+    public GridViewAdapter(Context context, String[] columns, String[][] rows, OnRowActionListener onRowActionListener) {
         _context = context;
         _columns = columns;
         _rows = rows;
@@ -41,19 +41,17 @@ public class GridViewAdapter extends BaseAdapter implements View.OnClickListener
         int rowIndex = i / (_columns.length + 1);
         int columnIndex = i % (_columns.length + 1);
 
-        if(rowIndex == 0) {
-            if(columnIndex == 0) {
+        if (rowIndex == 0) {
+            if (columnIndex == 0) {
                 return new View(_context);
-            }
-            else{
+            } else {
                 TextView textView = (TextView) View.inflate(_context, R.layout.cell_table_view, null);
                 textView.setText(_columns[columnIndex - 1]);
                 textView.setTypeface(null, Typeface.BOLD);
                 return textView;
             }
-        }
-        else{
-            if(columnIndex == 0) {
+        } else {
+            if (columnIndex == 0) {
                 LinearLayout buttons = (LinearLayout) View.inflate(_context, R.layout.cell_buttons_table_view, null);
 
                 buttons.findViewById(R.id.btCellEdit).setTag(String.format("%d;%d", 0, rowIndex - 1));
@@ -63,8 +61,7 @@ public class GridViewAdapter extends BaseAdapter implements View.OnClickListener
                 buttons.findViewById(R.id.btCellDelete).setOnClickListener(this);
 
                 return buttons;
-            }
-            else{
+            } else {
                 TextView textView = (TextView) View.inflate(_context, R.layout.cell_table_view, null);
                 textView.setText(_rows[rowIndex - 1][columnIndex - 1]);
                 return textView;
@@ -79,12 +76,11 @@ public class GridViewAdapter extends BaseAdapter implements View.OnClickListener
         int action = Integer.parseInt(data[0]);
         int index = Integer.parseInt(data[1]);
 
-        for(int i = 0; i < _columns.length; i++){
-            if(_columns[i].equalsIgnoreCase("RowId")){
-                if(action == 0){
+        for (int i = 0; i < _columns.length; i++) {
+            if (_columns[i].equalsIgnoreCase("RowId")) {
+                if (action == 0) {
                     _onRowActionListener.onEdit(_rows[index][i]);
-                }
-                else if(action == 1){
+                } else if (action == 1) {
                     _onRowActionListener.onDelete(_rows[index][i]);
                 }
                 break;
@@ -92,8 +88,9 @@ public class GridViewAdapter extends BaseAdapter implements View.OnClickListener
         }
     }
 
-    public interface OnRowActionListener{
+    public interface OnRowActionListener {
         void onEdit(String rowId);
+
         void onDelete(String rowId);
     }
 }

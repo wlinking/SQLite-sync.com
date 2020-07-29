@@ -8,13 +8,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -30,69 +30,47 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private static final int STORAGE_PERMISSION_CODE = 101;
     private static final int READ_PHONE_STATE = 102;
 
     // Function to check and request permission
-    public void checkPermission(String permission, int requestCode)
-    {
+    public void checkPermission(String permission, int requestCode) {
 
         // Checking if permission is not granted
-        if (ContextCompat.checkSelfPermission(MainActivity.this,permission) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(
-                            MainActivity.this,
-                            new String[] { permission },
-                            requestCode);
-        }
-        else {
-            Toast.makeText(MainActivity.this,
-                            "Permission already granted",
-                            Toast.LENGTH_SHORT).show();
+                    MainActivity.this,
+                    new String[]{permission},
+                    requestCode);
+        } else {
+            Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode,
-                        permissions,
-                        grantResults);
+                permissions,
+                grantResults);
 
         if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivity.this,
-                        "Storage Permission Granted",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(MainActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
             }
-            else {
-                Toast.makeText(MainActivity.this,
-                        "Storage Permission Denied",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
-        else if (requestCode == READ_PHONE_STATE) {
+        } else if (requestCode == READ_PHONE_STATE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivity.this,
-                        "Phone state Permission Granted",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-            else {
-                Toast.makeText(MainActivity.this,
-                        "Phone state Permission Denied",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                Toast.makeText(MainActivity.this, "Phone state Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Phone state Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         checkPermission(Manifest.permission.READ_PHONE_STATE, READ_PHONE_STATE);
 
         SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-        ((TextView) findViewById(R.id.tbSqlite_sync_url)).setText(preferences.getString("sqlite_sync_url", "http://ampli1.amplifier.com.pl:8081/demo/API3"));
+        ((TextView) findViewById(R.id.tbSqlite_sync_url)).setText(preferences.getString("sqlite_sync_url", "http://172.16.37.117:8091/SqliteSync-3.2.16/API3"));
 
         findViewById(R.id.btReinitialize).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,13 +153,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btSelectFrom).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<String> tables = new ArrayList<String>();
+                List<String> tables = new ArrayList<>();
 
                 SQLiteDatabase db = null;
                 Cursor cursor = null;
 
                 try {
-                    db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", 1, null);
+                    db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", MODE_PRIVATE, null);
                     cursor = db.rawQuery("select tbl_Name from sqlite_master where type='table'", null);
                     while (cursor.moveToNext()) {
                         tables.add(cursor.getString(0));
@@ -196,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 new AlertDialog.Builder(MainActivity.this)
-                        .setAdapter(new ArrayAdapter<String>(
+                        .setAdapter(new ArrayAdapter<>(
                                 MainActivity.this,
                                 R.layout.spinner_item,
                                 tables
@@ -216,8 +194,42 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }
         });
-    }
 
+        findViewById(R.id.btAddTable).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProgressBar();
+                final Button button = (Button) v;
+                button.setEnabled(false);
+
+                String tableName = ((TextView) findViewById(R.id.tbName)).getText().toString();
+
+                String sqlite_sync_url = ((TextView) findViewById(R.id.tbSqlite_sync_url)).getText().toString();
+                SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("sqlite_sync_url", sqlite_sync_url);
+                SQLiteSync sqLite_sync = new SQLiteSync("/data/data/" + getPackageName() + "/sqlitesync.db",
+                        sqlite_sync_url);
+
+                sqLite_sync.addSynchrnizedTable(tableName, new SQLiteSync.SQLiteSyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        hideProgressBar();
+                        button.setEnabled(true);
+                        showMessage("add table successfully");
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        hideProgressBar();
+                        button.setEnabled(true);
+                        error.printStackTrace();
+                        showMessage("add table error : \n" + error.getMessage());
+                    }
+                });
+            }
+        });
+    }
 
     private String getSubscriberId() {
         final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
@@ -239,12 +251,12 @@ public class MainActivity extends AppCompatActivity {
         tmSerial = "" + tm.getSimSerialNumber();
         androidId = "" + Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
         return deviceUuid.toString();
     }
 
-    private void showMessage(String message){
-        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+    private void showMessage(String message) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
         dlgAlert.setMessage(message);
         dlgAlert.setTitle("SQLite-sync Demo");
         dlgAlert.setCancelable(false);
@@ -257,11 +269,11 @@ public class MainActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void showProgressBar(){
+    private void showProgressBar() {
         findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
     }
 
-    private void hideProgressBar(){
+    private void hideProgressBar() {
         findViewById(R.id.progressBar).setVisibility(View.GONE);
     }
 }

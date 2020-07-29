@@ -78,7 +78,7 @@ public class TableFormActivity extends AppCompatActivity {
         Cursor cursor = null;
 
         try{
-            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", 1, null);
+            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", MODE_PRIVATE, null);
             cursor = db.rawQuery(String.format("PRAGMA table_info(%s);", _tableName), null);
 
             int nameIdx = cursor.getColumnIndexOrThrow("name");
@@ -160,7 +160,7 @@ public class TableFormActivity extends AppCompatActivity {
         }
 
         try{
-            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", 1, null);
+            db = openOrCreateDatabase("/data/data/" + getPackageName() + "/sqlitesync.db", MODE_PRIVATE, null);
 
             if(_rowId == null){
                 db.insertOrThrow(_tableName, null, values);
