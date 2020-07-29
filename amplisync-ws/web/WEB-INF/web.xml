@@ -24,7 +24,7 @@
         <env-entry-name>working-dir</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <!--IMPROTANT! Set path for working dir with / on the end-->
-        <env-entry-value>/Users/tomek/Work/Sources/SQLite-sync.com/Wersja Community/</env-entry-value>
+        <env-entry-value>/home/linking/dev/Practice/sqlite/sqlite-sync/</env-entry-value>
     </env-entry>
 
 </web-app>

@@ -29,19 +29,18 @@ import javax.ws.rs.core.Response;
  * is strictly forbidden unless prior written permission is obtained
  * from AMPLIFIER sp. z o.o..
  **************************************************************************/
-
 @Path("/API3")
 public class SyncAPI3 {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String Test(){
+    public String Test() {
 
         CommonTools commonTools = new CommonTools();
         Boolean isConnectionOK = commonTools.CheckIfDBConnectionIsOK();
 
         String connectionStatus = "Database connected!";
-        if(!isConnectionOK)
+        if (!isConnectionOK)
             connectionStatus = "Error creating database connection.";
 
         return "API[" + commonTools.GetVersionOfSQLiteSyncCOM() + "] SQLite-Sync.COM is working correctly! " + connectionStatus;
@@ -50,8 +49,8 @@ public class SyncAPI3 {
     @GET
     @Path("/InitializeSubscriber/{subscriberUUID}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String InitializeSubscriber(@PathParam("subscriberUUID") String subscriberUUID){
-        if(subscriberUUID.isEmpty() || subscriberUUID == null)
+    public String InitializeSubscriber(@PathParam("subscriberUUID") String subscriberUUID) {
+        if (subscriberUUID.isEmpty())
             return "";
         SchemaGenerator schemaGenerator = new SchemaGenerator();
         return schemaGenerator.GetFullSchematScript(subscriberUUID);
@@ -60,8 +59,8 @@ public class SyncAPI3 {
     @GET
     @Path("/Sync/{subscriberUUID}/{tableId}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String SyncChanges(@PathParam("subscriberUUID") String subscriberUUID, @PathParam("tableId") String tableId){
-        if(subscriberUUID.isEmpty() || subscriberUUID == null || tableId.isEmpty() || tableId == null)
+    public String SyncChanges(@PathParam("subscriberUUID") String subscriberUUID, @PathParam("tableId") String tableId) {
+        if (subscriberUUID.isEmpty() || tableId.isEmpty())
             return "";
         SyncService sync = new SyncService();
         return sync.DoSync(subscriberUUID, tableId);
@@ -70,10 +69,10 @@ public class SyncAPI3 {
     @GET
     @Path("/CommitSync/{syncId}")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response SyncGetChanges(@PathParam("syncId") String syncId){
+    public Response SyncGetChanges(@PathParam("syncId") String syncId) {
 
         Response response = Response.ok().build();
-        if(syncId.isEmpty() || syncId == null)
+        if (syncId.isEmpty())
             return response;
         SyncService sync = new SyncService();
         sync.CommitSync(syncId);
@@ -85,7 +84,7 @@ public class SyncAPI3 {
     @Path("/Send")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public void RecieveChanges(DeviceDataObject recievedData){
+    public void RecieveChanges(DeviceDataObject recievedData) {
         SyncService sync = new SyncService();
         sync.ReceiveData(recievedData);
     }
@@ -93,8 +92,8 @@ public class SyncAPI3 {
     @GET
     @Path("/AddTable/{tableName}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String AddTable(@PathParam("tableName") String tableName){
-        if(tableName.isEmpty())
+    public String AddTable(@PathParam("tableName") String tableName) {
+        if (tableName.isEmpty())
             return "";
 
         CommonTools commonTools = new CommonTools();
@@ -106,8 +105,8 @@ public class SyncAPI3 {
     @GET
     @Path("/RemoveTable/{tableName}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String RemoveTable(@PathParam("tableName") String tableName){
-        if(tableName.isEmpty())
+    public String RemoveTable(@PathParam("tableName") String tableName) {
+        if (tableName.isEmpty())
             return "";
 
         CommonTools commonTools = new CommonTools();
