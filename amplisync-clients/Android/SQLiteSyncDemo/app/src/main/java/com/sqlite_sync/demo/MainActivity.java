@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -203,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
                 button.setEnabled(false);
 
                 String tableName = ((TextView) findViewById(R.id.tbName)).getText().toString();
+                if (TextUtils.isEmpty(tableName)) {
+                    Toast.makeText(MainActivity.this, "tableName is empty", Toast.LENGTH_SHORT).show();
+                }
 
                 String sqlite_sync_url = ((TextView) findViewById(R.id.tbSqlite_sync_url)).getText().toString();
                 SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
@@ -225,6 +229,44 @@ public class MainActivity extends AppCompatActivity {
                         button.setEnabled(true);
                         error.printStackTrace();
                         showMessage("add table error : \n" + error.getMessage());
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.btRmvTable).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProgressBar();
+                final Button button = (Button) v;
+                button.setEnabled(false);
+
+                String tableName = ((TextView) findViewById(R.id.tbNameR)).getText().toString();
+                if (TextUtils.isEmpty(tableName)) {
+                    Toast.makeText(MainActivity.this, "tableName is empty", Toast.LENGTH_SHORT).show();
+                }
+
+                String sqlite_sync_url = ((TextView) findViewById(R.id.tbSqlite_sync_url)).getText().toString();
+                SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("sqlite_sync_url", sqlite_sync_url);
+                SQLiteSync sqLite_sync = new SQLiteSync("/data/data/" + getPackageName() + "/sqlitesync.db",
+                        sqlite_sync_url);
+
+                sqLite_sync.removeSynchrnizedTable(tableName, new SQLiteSync.SQLiteSyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        hideProgressBar();
+                        button.setEnabled(true);
+                        showMessage("remove table successfully");
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        hideProgressBar();
+                        button.setEnabled(true);
+                        error.printStackTrace();
+                        showMessage("remove table error : \n" + error.getMessage());
                     }
                 });
             }

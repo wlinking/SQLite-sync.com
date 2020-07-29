@@ -293,15 +293,13 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status) {
-                case HttpURLConnection.HTTP_OK:
-                    resultStream = connection.getInputStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    break;
-                default:
-                    resultStream = connection.getErrorStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    throw new Exception(resultString);
+            if (status == HttpURLConnection.HTTP_OK) {
+                resultStream = connection.getInputStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+            } else {
+                resultStream = connection.getErrorStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                throw new Exception(resultString);
             }
         } finally {
             if (resultStream != null) {
@@ -326,7 +324,7 @@ public class SQLiteSync {
     public void removeSynchrnizedTable(String tableName) throws Exception {
         HttpURLConnection connection = null;
         InputStream resultStream = null;
-        String resultString = null;
+        String resultString;
 
         String requestUrl = String.format("%s/RemoveTable/%s", _serverURL, tableName);
 
@@ -431,7 +429,7 @@ public class SQLiteSync {
             }
 
             builder.append("<delete>");
-            query = String.format("select TableId,RowId from MergeDelete;");
+            query = "select TableId,RowId from MergeDelete;";
             cursor = db.rawQuery(query, null);
             while (cursor.moveToNext()) {
                 builder.append(
