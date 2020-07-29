@@ -678,21 +678,20 @@ public class SQLiteSync {
 
             int status = connection.getResponseCode();
 
-            switch (status) {
-                case HttpURLConnection.HTTP_OK:
-                    resultStream = connection.getInputStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    break;
-                default:
-                    resultStream = connection.getErrorStream();
-                    resultString = IOUtils.toString(resultStream, "UTF-8");
-                    throw new Exception(resultString);
+            if (status == HttpURLConnection.HTTP_OK) {
+                resultStream = connection.getInputStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+            } else {
+                resultStream = connection.getErrorStream();
+                resultString = IOUtils.toString(resultStream, "UTF-8");
+                throw new Exception(resultString);
             }
         } finally {
             if (resultStream != null) {
                 try {
                     resultStream.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             if (connection != null) {
