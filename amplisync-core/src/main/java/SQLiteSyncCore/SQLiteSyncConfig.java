@@ -33,14 +33,14 @@ import java.util.Properties;
 public class SQLiteSyncConfig {
 
     public static Boolean IsConfigLoaded = false;
-    public static String DBURL = "jdbc:mysql://127.0.0.1:3306/sqlitesync?rewriteBatchedStatements=true";
+    public static String DBURL = "jdbc:mysql://127.0.0.1:3306/test?rewriteBatchedStatements=true";
     public static String DBUSER = "root";
-    public static String DBPASS = "pass";
+    public static String DBPASS = "root";
     public static String DBDRIVER = "com.mysql.cj.jdbc.Driver";
     public static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static Integer HISTORY_DAYS = 7;
     public static String WORKING_DIR = "../working dir/";
-    public static Integer LOG_LEVEL = 5;
+    public static Integer LOG_LEVEL = 4;
     public static String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ssZZ";
 
     public static void Load() {
